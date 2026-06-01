@@ -45,7 +45,7 @@ for instance in "$@"; do
     echo "Instance ID : $INSTANCE_ID"
     echo "Private IP  : $PRIVATE_IP"
 
-    IpAddress="$PRIVATE_IP"
+    IpAddress="${PRIVATE_IP}"
 
     
     if [[ "$instance" == "frontend" ]]; then 
@@ -67,6 +67,7 @@ for instance in "$@"; do
 
     echo "updating the DNS record for the $instance"
 
+    declare -p PRIVATE_IP IpAddress
 
     aws route53 change-resource-record-sets \
         --hosted-zone-id $ZONE_ID \
@@ -95,6 +96,7 @@ for instance in "$@"; do
                           }
                         '
                       )"
-    echo "record updated for $instance,  domain=$RECORD_NAME"
+
+    echo -e "record updated for $instance, IpAddress:${IpAddress}, domain: $RECORD_NAME"
     echo "======================================="
 done
