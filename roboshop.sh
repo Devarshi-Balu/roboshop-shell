@@ -70,26 +70,31 @@ for instance in "$@"; do
 
     aws route53 change-resource-record-sets \
         --hosted-zone-id $ZONE_ID \
-        --change-batch '
-            {
-              "Comment": "Updating record",
-              "Changes": [
-                {
-                  "Action": "UPSERT",
-                  "ResourceRecordSet": {
-                    "Name": "'$RECORD_NAME'",
-                    "Type": "A",
-                    "TTL": 1,
-                    "ResourceRecords": [
-                      {
-                        "Value": '"$IpAddress"'
-                      }
-                    ]
-                  }
-                }
-              ]
-          }
-        '
-    echo "record updated for $instance , $IpAddress , domain=$RECORD_NAME"
+        --change-batch "$(
+                      jq -n \
+                        --arg record "$RECORD_NAME" \
+                        --arg ip "$IpAddress" \
+                        '
+                          {
+                            Comment: "Updating record",
+                            Changes: [
+                              {
+                                Action: "UPSERT",
+                                ResourceRecordSet: {
+                                  Name: $record,
+                                  Type: "A",
+                                  TTL: 1,
+                                  ResourceRecords: [
+                                    {
+                                      Value: $ip
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        '
+                      )"
+    echo "record updated for $instance,  domain=$RECORD_NAME"
     echo "======================================="
 done
