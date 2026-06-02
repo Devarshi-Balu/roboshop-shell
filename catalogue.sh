@@ -41,19 +41,25 @@ validate "enabling nodejs:20 version"
 dnf install nodejs -y 
 validate "installing nodejs"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-validate "adding roboshop system user"
+#adding roboshop system user
+id roboshop 
+if [[ "$?" -ne 0 ]]; then 
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    validate "adding roboshop system user"
+else 
+    echo -e "user 'roboshop' already exists ... $Y SKIPPING $N"
+fi 
 
 #setting up the app directory
 mkdir -p /app 
-curl -o "/tmp/catalogue.zip" "https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip" 
+curl -L -o "/tmp/catalogue.zip" "https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip" 
 validate "downloading the catalogue code file zip folder"
 
 (
     set -e
 
     cd /app 
-    unzip /tmp/catalogue.zip
+    unzip -o /tmp/catalogue.zip
     npm install 
     
     chown -R "roboshop:roboshop" /app
@@ -76,5 +82,14 @@ validate "copying the repo file for mongodb"
 dnf install mongodb-mongosh -y
 validate "install mongsh client"
 
-mongosh --host mongodb.rb.devarshi.live </app/db/master-data.js
-validate "inserting the master data into the monogdb server"
+INDEX=$(mongosh --host $MONGODB_HOST --quiet  --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+
+if [ "$INDEX" -lt 0 ]; then
+    mongosh --host mongodb.rb.devarshi.live </app/db/master-data.js
+    validate "Loading master data"
+else
+    echo -e "Master data already loaded ... $Y SKIPPING ...."
+fi
+
+systemctl restart catalogue
+validate "Restarting catalogue"

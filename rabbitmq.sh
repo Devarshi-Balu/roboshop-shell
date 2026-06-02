@@ -42,8 +42,7 @@ systemctl enable rabbitmq-server
 systemctl start rabbitmq-server
 validate "enabling and starting rabbitmq service" 
 
-
-rabbitmqctl add_user roboshop roboshop123
+rabbitmqctl list_users | grep -w roboshop || rabbitmqctl add_user roboshop roboshop123 
 validate "adding roboshop user to the rabbitmq server"
 
 rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"

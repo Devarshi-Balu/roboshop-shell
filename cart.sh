@@ -41,8 +41,14 @@ validate "enabling nodejs:20 version"
 dnf install nodejs -y 
 validate "installing nodejs"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-validate "adding roboshop system user"
+#adding roboshop system user
+id roboshop 
+if [[ "$?" -ne 0 ]]; then 
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    validate "adding roboshop system user"
+else 
+    echo -e "user 'roboshop' already exists ... $Y SKIPPING $N"
+fi 
 
 mkdir -p /app
 
@@ -53,7 +59,7 @@ validate "downloading the cart code files"
     set -e 
 
     cd /app 
-    unzip /tmp/cart.zip
+    unzip -o /tmp/cart.zip
 
     npm i 
     chown -R "roboshop:roboshop" /app

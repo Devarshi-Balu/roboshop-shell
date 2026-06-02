@@ -35,11 +35,17 @@ function validate(){
 dnf install python3 gcc python3-devel -y
 validate "installing the python package"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-validate "adding roboshop system user"
+#adding roboshop system user
+id roboshop 
+if [[ "$?" -ne 0 ]]; then 
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    validate "adding roboshop system user"
+else 
+    echo -e "user 'roboshop' already exists ... $Y SKIPPING $N"
+fi 
+
 
 mkdir -p /app 
-
 
 curl -L -o /tmp/payment.zip https://roboshop-artifacts.s3.amazonaws.com/payment-v3.zip 
 validate "downloading the shipping code files"
@@ -48,7 +54,7 @@ validate "downloading the shipping code files"
     set -e 
 
     cd /app 
-    unzip /tmp/payment.zip
+    unzip -o /tmp/payment.zip
 
     pip3 install -r requirements.txt
     chown -R "roboshop:roboshop" /app

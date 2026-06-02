@@ -35,8 +35,14 @@ function validate(){
 dnf install maven -y
 validate "installing maven package"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-validate "adding roboshop system user"
+#adding roboshop system user
+id roboshop 
+if [[ "$?" -ne 0 ]]; then 
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    validate "adding roboshop system user"
+else 
+    echo -e "user 'roboshop' already exists ... $Y SKIPPING $N"
+fi 
 
 mkdir -p /app 
 
@@ -47,7 +53,7 @@ validate "downloading the shipping code files"
     set -e 
 
     cd /app 
-    unzip /tmp/shipping.zip
+    unzip -o /tmp/shipping.zip
 
     mvn clean package 
     mv target/shipping-1.0.jar shipping.jar 
@@ -70,14 +76,19 @@ validate "enabling and starting the service"
 dnf install mysql -y 
 validate "installing mysql package"
 
-mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/schema.sql
-validate "adding schema to the db" 
+mysql -h $MYSQL_HOST -uroot -pRoboShop@1 -e 'use cities'
+if [ $? -ne 0 ]; then
+    mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/schema.sql
+    validate "adding schema to the db" 
 
-mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/app-user.sql 
-validate "adding app user data to the db" 
+    mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/app-user.sql 
+    validate "adding app user data to the db" 
 
-mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/master-data.sql
-validate "adding master data to the db"
+    mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/master-data.sql
+    validate "adding master data to the db"
+else
+    echo -e "data is already loaded ... $Y SKIPPING $N"
+fi
 
 systemctl restart shipping
 validate "restarting the shipping service"

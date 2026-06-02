@@ -35,8 +35,15 @@ function validate(){
 dnf install golang -y
 validate "installing golang package" 
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-validate "adding roboshop system user"
+#adding roboshop system user
+id roboshop 
+if [[ "$?" -ne 0 ]]; then 
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
+    validate "adding roboshop system user"
+else 
+    echo -e "user 'roboshop' already exists ... $Y SKIPPING $N"
+fi 
+
 
 mkdir -p /app 
 
@@ -47,7 +54,7 @@ validate "downloading the code file zip folder for the dispatch application"
     set -e 
 
     cd /app 
-    unzip /tmp/dispatch.zip
+    unzip -o /tmp/dispatch.zip
 
     go mod init dispatch
     go get 
