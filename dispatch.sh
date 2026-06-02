@@ -51,16 +51,17 @@ curl -L -o /tmp/dispatch.zip https://roboshop-artifacts.s3.amazonaws.com/dispatc
 validate "downloading the code file zip folder for the dispatch application"
 
 (
-    set -e 
+    set -e
 
-    cd /app 
+    cd /app
     unzip -o /tmp/dispatch.zip
 
-    go mod init dispatch
-    go get 
+    [ -f go.mod ] || go mod init dispatch
+
+    go mod tidy
     go build
 
-    chown -R "roboshop:roboshop" /app
+    chown -R roboshop:roboshop /app
 )
 validate "unzip, installing packages and changing the ownership of /app"
 
