@@ -44,37 +44,29 @@ validate "installing nodejs"
 useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
 validate "adding roboshop system user"
 
+
 #setting up the app directory
 mkdir -p /app 
-curl -o "/tmp/catalogue.zip" "https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip" 
-validate "downloading the catalogue code file zip folder"
+curl -L -o /tmp/user.zip https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip 
+validate "downloading the user code files zip folder"
 
 (
     set -e
 
     cd /app 
-    unzip /tmp/catalogue.zip
+    unzip /tmp/user.zip
     npm install 
     
     chown -R "roboshop:roboshop" /app
 )
 validate "unzip, installing packages and changing the ownership of /app"
 
-cp "${script_dir_path}/catalogue.service" "/etc/systemd/system/catalogue.service"
-validate "copying the service file for catalogue"
+cp "${script_dir_path}/user.service" "/etc/systemd/system/user.service"
+validate "copying the user service file"
 
 systemctl daemon-reload
 validate "loading the service"
 
-systemctl enable catalogue 
-systemctl start catalogue
-validate "enabling and starting the catalogue service"
-
-cp "${script_dir_path}/mongo.repo" "/etc/yum.repos.d/mongo.repo"
-validate "copying the repo file for mongodb"
-
-dnf install mongodb-mongosh -y
-validate "install mongsh client"
-
-mongosh --host mongodb.rb.devarshi.live </app/db/master-data.js
-validate "inserting the master data into the monogdb server"
+systemctl enable user 
+systemctl start user
+validate "enabling and starting the user service"
