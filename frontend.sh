@@ -58,7 +58,7 @@ validate "downloading the frontend code files zip folder"
 )
 validate "unzipping the code files"
 
-cp "${script_path_dir}/nginx.conf" "etc/nginx/nginx.conf"
+cp "${script_dir_path}/nginx.conf" "/etc/nginx/nginx.conf"
 validate "copying the nginx config file"
 
 systemctl restart nginx 
