@@ -41,13 +41,12 @@ for instance in "$@"; do
             --output text
         )
 
-    echo "successfully created the instance for the $instance"
-    echo "Instance ID : $INSTANCE_ID"
-    echo "Private IP  : $PRIVATE_IP"
+    echo "successfully created the instance for the ${instance}"
+    echo "Instance ID : ${INSTANCE_ID}"
+    echo "Private IP  : ${PRIVATE_IP}"
 
     IpAddress="${PRIVATE_IP}"
 
-    
     if [[ "$instance" == "frontend" ]]; then 
         aws ec2 wait instance-running \
         --instance-ids "$INSTANCE_ID"
@@ -59,15 +58,15 @@ for instance in "$@"; do
                 --output text 
         )
 
-        echo "Updated the IP address of the frontend to the public IpAddress"
+        echo "updating IP address of the frontend to the public IpAddress"
         IpAddress="${PUBLIC_IP}"
     fi
 
-    RECORD_NAME="${instance}.$DOMAIN_NAME"
+    RECORD_NAME="$instance.$DOMAIN_NAME"
 
     echo "updating the DNS record for the $instance"
 
-    declare -p PRIVATE_IP IpAddress
+    # declare -p PRIVATE_IP IpAddress # for debugging
 
     aws route53 change-resource-record-sets \
         --hosted-zone-id $ZONE_ID \
