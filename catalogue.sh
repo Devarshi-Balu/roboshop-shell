@@ -82,13 +82,15 @@ validate "copying the repo file for mongodb"
 dnf install mongodb-mongosh -y
 validate "install mongsh client"
 
-INDEX=$(mongosh --host $MONGODB_HOST --quiet  --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+
+MongoDBHost="mongodb.rb.devarshi.live"
+INDEX=$(mongosh --host "$MongoDBHost" --quiet --eval 'db.getMongo().getDBNames().indexOf("catalogue")' | tail -1)
 
 if [ "$INDEX" -lt 0 ]; then
-    mongosh --host mongodb.rb.devarshi.live </app/db/master-data.js
+    mongosh --host $MongoDBHost </app/db/master-data.js
     validate "Loading master data"
 else
-    echo -e "Master data already loaded ... $Y SKIPPING ...."
+    echo -e "Master data already loaded ... $Y SKIPPING ....$N"
 fi
 
 systemctl restart catalogue
