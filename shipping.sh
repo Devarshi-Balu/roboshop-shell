@@ -32,22 +32,16 @@ function validate(){
     fi
 }
 
-dnf module disable nodejs -y
-validate "disbaling the nodejs module"
-
-dnf module enable nodejs:20 -y 
-validate "enabling nodejs:20 version"
-
-dnf install nodejs -y 
-validate "installing nodejs"
+dnf install maven -y
+validate "installing maven package"
 
 useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
 validate "adding roboshop system user"
 
-mkdir -p /app
+mkdir -p /app 
 
-curl -L -o /tmp/cart.zip https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip
-validate "downloading the cart code files"
+curl -L -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip 
+validate "downloading the shipping code files"
 
 (
     set -e 
@@ -55,18 +49,35 @@ validate "downloading the cart code files"
     cd /app 
     unzip /tmp/cart.zip
 
-    npm i 
+    mvn clean package 
+    mv target/shipping-1.0.jar shipping.jar 
+
     chown -R "roboshop:roboshop" /app
 )
 validate "unzip, installing packages and changing the ownership of /app"
 
-cp "${script_dir_path}/cart.service" "/etc/systemd/system/cart.service" 
-validate "copying the cart service file" 
-
+cp "${script_dir_path}/shipping.service" "/etc/systemd/system/shipping.service" 
+validate "copying the shipping service file" 
 
 systemctl daemon-reload
 validate "loading the service"
 
-systemctl enable cart 
-systemctl start cart
-validate "enabling and starting the cart service"
+systemctl enable shipping 
+systemctl start shipping
+validate "enabling and starting the service"
+
+#installing the mysql client packages
+dnf install mysql -y 
+validate "installing mysql package"
+
+mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pRoboShop@1 < /app/db/schema.sql
+validate "adding schema to the db" 
+
+mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pRoboShop@1 < /app/db/app-user.sql 
+validate "adding app user data to the db" 
+
+mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pRoboShop@1 < /app/db/master-data.sql
+validate "adding master data to the db"
+
+systemctl restart shipping
+validate "restarting the shipping service"
