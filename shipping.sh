@@ -70,13 +70,13 @@ validate "enabling and starting the service"
 dnf install mysql -y 
 validate "installing mysql package"
 
-mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pRoboShop@1 < /app/db/schema.sql
+mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/schema.sql
 validate "adding schema to the db" 
 
-mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pRoboShop@1 < /app/db/app-user.sql 
+mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/app-user.sql 
 validate "adding app user data to the db" 
 
-mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -pRoboShop@1 < /app/db/master-data.sql
+mysql -h mysql.rb.devarshi.live -uroot -pRoboShop@1 < /app/db/master-data.sql
 validate "adding master data to the db"
 
 systemctl restart shipping

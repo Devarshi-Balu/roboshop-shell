@@ -47,4 +47,4 @@ validate "disabling the protected-mode of redis"
 
 systemctl enable redis
 systemctl start redis 
-VALIDATE "Enabling and starting redis service"
+validate "Enabling and starting redis service"
