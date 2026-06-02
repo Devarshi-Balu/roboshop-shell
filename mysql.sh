@@ -17,7 +17,7 @@ N="\e[0m"
 
 user_id=$(id -u)
 
-if [[ "$user_id" -ne 0 ]]; then 
+if [[ $user_id -ne 0 ]]; then 
     echo "Please run the script as root user"; 
     exit 1; 
 fi
@@ -32,18 +32,12 @@ function validate(){
     fi
 }
 
-cp ${script_dir_path}/mongo.repo /etc/yum.repos.d/mongo.repo
-validate "copying mongo repo file"
+dnf install mysql-server -y
+validate "installing mysql server"
 
-dnf install mongodb-org -y 
-validate "Installing MongoDB server"
+systemctl enable mysqld
+systemctl start mysqld  
+validate "enabling and starting the mysqld service"
 
-systemctl enable mongod 
-systemctl start mongod 
-validate "enabling and starting the mongod server" 
-
-sed -i -e "s/127.0.0.1/0.0.0.0/g" "/etc/mongod.conf"
-validate "changing the port binding of mongod server for allowing remote connections"
-
-systemctl restart mongod
-validate "Restarting the mongodb server"
+mysql_secure_installation --set-root-pass RoboShop@1
+validate "setting the root password for the mysql server"

@@ -1,7 +1,7 @@
 #log_files variables
 script_name="$(basename "$0" .sh)"
 script_dir_path="$(realpath "$(dirname "$0")")"
-logs_dir="$script_dir_path/logs"
+logs_dir="${script_dir_path}/logs"
 timestamp=$(date +"%Y%m%d_%H%M%S")
 log_file="${logs_dir}/${script_name}_${timestamp}.log"
 
@@ -31,3 +31,20 @@ function validate(){
         echo -e "$1 ... $G Success $N";
     fi
 }
+
+cp "${script_dir_path}/rabbitmq.repo" "/etc/yum.repos.d/rabbitmq.repo"
+validate "adding rabbitmq repo"
+
+dnf install rabbitmq-server -y
+validate "installing Rabbitmq server"
+
+systemctl enable rabbitmq-server
+systemctl start rabbitmq-server
+validate "enabling and starting rabbitmq service" 
+
+
+rabbitmqctl add_user roboshop roboshop123
+validate "adding roboshop user to the rabbitmq server"
+
+rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
+validate "setting roboshop user permissions in rabbitmq server"
